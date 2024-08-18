@@ -12,7 +12,7 @@ recognizer = sr.Recognizer()
 samplerate = 16000  # Hertz
 
 # Duration of the recording
-duration = 3  # seconds
+duration = 2  # seconds
 
 # State to manage multi-step interactions
 interaction_state = {
