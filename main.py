@@ -1,8 +1,9 @@
 import speech_recognition as sr
 
+# Initialize the recognizer
 recognizer = sr.Recognizer()
 
-
+# Define preset commands and their responses
 commands = {
     "hello": "Hi there! How can I assist you?",
     "goodbye": "Goodbye! Have a great day!",
@@ -10,8 +11,7 @@ commands = {
     "how are you": "I'm just a bunch of code, but I'm here to help!"
 }
 
-
-
+# Function to recognize speech from the microphone
 def recognize_speech():
     with sr.Microphone() as source:
         print("Listening...")
@@ -27,11 +27,8 @@ def recognize_speech():
         except sr.RequestError:
             print("Sorry, the speech service is unavailable.")
             return ""
-        
 
-
-
-
+# Function to respond to recognized command
 def respond_to_command(command):
     for key in commands:
         if key in command:
