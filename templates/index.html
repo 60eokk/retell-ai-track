@@ -4,21 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Command Interface</title>
-    <script>
-        function sendCommand() {
-            fetch('/listen', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('command').innerText = "You said: " + data.command;
-                    document.getElementById('response').innerText = "Response: " + data.response;
-                });
+    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
         }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #1d1d1f;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        h1.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        button {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005bb5;
+            box-shadow: 0 10px 20px rgba(0, 113, 227, 0.3);
+        }
+
+        p {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #1d1d1f;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        p.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #command, #response {
+            font-weight: 400;
+            color: #0071e3;
+            margin-top: 10px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #0071e3;
+            animation: spin 1s infinite linear;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Show container with animation
+            setTimeout(() => {
+                document.querySelector('.container').classList.add('visible');
+                document.querySelector('h1').classList.add('visible');
+                document.querySelectorAll('p').forEach(p => p.classList.add('visible'));
+            }, 200);
+
+            // Function to handle the loading animation
+            function showLoading() {
+                document.querySelector('.loading').style.display = 'block';
+            }
+
+            function hideLoading() {
+                document.querySelector('.loading').style.display = 'none';
+            }
+
+            // Function to send voice command
+            function sendCommand() {
+                showLoading();
+                fetch('/listen', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('command').innerText = "You said: " + data.command;
+                        document.getElementById('response').innerText = "Response: " + data.response;
+                    })
+                    .finally(() => {
+                        hideLoading();
+                    });
+            }
+
+            // Attach event listener to the button
+            document.querySelector('button').addEventListener('click', sendCommand);
+        });
     </script>
 </head>
 <body>
-    <h1>Voice Command Interface</h1>
-    <button onclick="sendCommand()">Speak</button>
-    <p id="command">You said: </p>
-    <p id="response">Response: </p>
+    <div class="container">
+        <h1>Voice Command Interface</h1>
+        <button>Speak</button>
+        <div class="loading"></div>
+        <p id="command">You said: </p>
+        <p id="response">Response: </p>
+    </div>
 </body>
 </html>
