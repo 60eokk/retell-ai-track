@@ -1,6 +1,9 @@
+from flask import Flask, render_template, request, jsonify
 import sounddevice as sd
 import numpy as np
 import speech_recognition as sr
+
+app = Flask(__name__)
 
 # Initialize the recognizer
 recognizer = sr.Recognizer()
@@ -23,14 +26,11 @@ def recognize_speech(audio_data):
     try:
         audio = sr.AudioData(audio_data.tobytes(), samplerate, 2)
         text = recognizer.recognize_google(audio)
-        print(f"You said: {text}")
         return text.lower()
     except sr.UnknownValueError:
-        print("Sorry, I did not understand that.")
-        return ""
+        return "Sorry, I did not understand that."
     except sr.RequestError:
-        print("Sorry, the speech service is unavailable.")
-        return ""
+        return "Sorry, the speech service is unavailable."
 
 # Define preset commands and their responses
 commands = {
@@ -44,15 +44,19 @@ commands = {
 def respond_to_command(command):
     for key in commands:
         if key in command:
-            print(commands[key])
-            return
-    print("Sorry, I don't recognize that command.")
+            return commands[key]
+    return "Sorry, I don't recognize that command."
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/listen', methods=['POST'])
+def listen():
+    audio_data = record_audio()
+    command = recognize_speech(audio_data)
+    response = respond_to_command(command)
+    return jsonify({'command': command, 'response': response})
 
 if __name__ == "__main__":
-    while True:
-        audio_data = record_audio()
-        command = recognize_speech(audio_data)
-        if "exit" in command:
-            print("Exiting...")
-            break
-        respond_to_command(command)
+    app.run(debug=True)
