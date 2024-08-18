@@ -14,6 +14,12 @@ samplerate = 16000  # Hertz
 # Duration of the recording
 duration = 3  # seconds
 
+# State to manage multi-step interactions
+interaction_state = {
+    "current_step": None,
+    "current_task": None
+}
+
 # Function to capture audio using sounddevice
 def record_audio():
     print("Listening...")
@@ -32,20 +38,42 @@ def recognize_speech(audio_data):
     except sr.RequestError:
         return "Sorry, the speech service is unavailable."
 
-# Define preset commands and their responses
-commands = {
-    "hello": "Hi there! How can I assist you?",
-    "goodbye": "Goodbye! Have a great day!",
-    "what's your name": "I am your voice assistant.",
-    "how are you": "I'm just a bunch of code, but I'm here to help!"
-}
+# Function to handle complex interactions
+def handle_complex_interaction(command):
+    if interaction_state["current_step"] == "awaiting_task_name":
+        interaction_state["current_task"] = command
+        interaction_state["current_step"] = None
+        return f"Task '{command}' started."
+
+    if "start a new task" in command:
+        interaction_state["current_step"] = "awaiting_task_name"
+        return "What task would you like to start?"
+
+    if "what's my next task" in command:
+        if interaction_state["current_task"]:
+            return f"Your next task is '{interaction_state['current_task']}'."
+        else:
+            return "You don't have any tasks at the moment."
+
+    return "Sorry, I don't recognize that command."
 
 # Function to respond to recognized command
 def respond_to_command(command):
-    for key in commands:
-        if key in command:
-            return commands[key]
-    return "Sorry, I don't recognize that command."
+    if interaction_state["current_step"]:
+        return handle_complex_interaction(command)
+    
+    # Define simple commands here
+    if "hello" in command:
+        return "Hi there! How can I assist you?"
+    if "goodbye" in command:
+        return "Goodbye! Have a great day!"
+    if "what's your name" in command:
+        return "I am your voice assistant."
+    if "how are you" in command:
+        return "I'm just a bunch of code, but I'm here to help!"
+
+    # Handle complex interactions
+    return handle_complex_interaction(command)
 
 @app.route('/')
 def index():
